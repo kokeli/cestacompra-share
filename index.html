@@ -5,79 +5,48 @@
     <title>Abriendo Cesta de la Compra...</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f6f8;
-            color: #333;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            max-width: 400px;
-        }
-        .icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        h1 { margin-top: 0; font-size: 24px; color: #1a1a1a; }
-        p { color: #666; margin-bottom: 24px; line-height: 1.5; }
-        .button {
-            display: inline-block;
-            background-color: #000000;
-            color: white;
-            text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-        }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; background: #f4f6f8; }
+        .container { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .button { display: inline-block; background: #000; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">🛒</div>
-        <h1>Abriendo tu Cesta...</h1>
-        <p>Si la aplicación no se abre automáticamente, pulsa el botón de abajo.</p>
+        <h1>🛒 Abriendo tu Cesta...</h1>
+        <p>Si la App no se abre sola, pulsa el botón:</p>
         <a id="openAppBtn" href="#" class="button">Importar en la App</a>
     </div>
 
     <script>
-        // 1. Leer los datos del enlace (vengan comprimidos o no)
+        // 1. Analizamos la URL para ver qué nos llega
         const urlParams = new URLSearchParams(window.location.search);
-        const data = urlParams.get('data');
+        const id = urlParams.get('id');     // Nuevo sistema (Firebase)
+        const data = urlParams.get('data'); // Sistema antiguo (GZIP)
 
-        if (data) {
-            // 2. Creamos el Deep Link. 
-            // IMPORTANTE: No tocamos los datos, se los pasamos tal cual a la App 
-            // para que ella los descomprima.
-            const appDeepLink = "cestacompra://import?data=" + encodeURIComponent(data);
-            
-            // 3. Preparamos el botón de respaldo
+        let appDeepLink = null;
+        
+        // 2. Construimos el enlace hacia la App Android
+        if (id) {
+            // Caso Firebase: solo pasamos el ID
+            appDeepLink = "cestacompra://import?id=" + encodeURIComponent(id);
+        } else if (data) {
+            // Caso GZIP: pasamos los datos comprimidos
+            appDeepLink = "cestacompra://import?data=" + encodeURIComponent(data);
+        }
+
+        // 3. Ejecutamos la magia
+        if (appDeepLink) {
+            // Cambiamos el enlace del botón de seguridad
             document.getElementById('openAppBtn').href = appDeepLink;
             
-            // 4. Intentamos abrir la App automáticamente
+            // Intentamos abrir la app automáticamente
             window.location.replace(appDeepLink);
-            
-            // Si después de 2 segundos nada ha pasado, puede que la App no esté instalada
-            setTimeout(function() {
-                console.log("La redirección automática podría haber fallado.");
-            }, 2000);
         } else {
             document.querySelector('h1').innerText = "Enlace no válido";
-            document.querySelector('p').innerText = "No se han encontrado datos en este enlace.";
-            document.getElementById('openAppBtn').style.display = 'none';
+            document.querySelector('p').innerText = "No hemos encontrado información de la cesta.";
         }
     </script>
 </body>
 </html>
+
 
