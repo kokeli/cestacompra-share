@@ -52,26 +52,32 @@
     </div>
 
     <script>
-        // 1. Leer los datos del enlace de WhatsApp
+        // 1. Leer los datos del enlace (vengan comprimidos o no)
         const urlParams = new URLSearchParams(window.location.search);
         const data = urlParams.get('data');
 
         if (data) {
-            // 2. Crear el enlace mágico para Android
+            // 2. Creamos el Deep Link. 
+            // IMPORTANTE: No tocamos los datos, se los pasamos tal cual a la App 
+            // para que ella los descomprima.
             const appDeepLink = "cestacompra://import?data=" + encodeURIComponent(data);
             
-            // 3. Preparar el botón por si falla el automático
+            // 3. Preparamos el botón de respaldo
             document.getElementById('openAppBtn').href = appDeepLink;
             
-            // 4. Intentar redirigir automáticamente al instante!
+            // 4. Intentamos abrir la App automáticamente
+            window.location.replace(appDeepLink);
+            
+            // Si después de 2 segundos nada ha pasado, puede que la App no esté instalada
             setTimeout(function() {
-                window.location.replace(appDeepLink);
-            }, 100);
+                console.log("La redirección automática podría haber fallado.");
+            }, 2000);
         } else {
-            document.querySelector('h1').innerText = "Enlace inválido";
-            document.querySelector('p').innerText = "No se han encontrado datos de la cesta en este enlace.";
+            document.querySelector('h1').innerText = "Enlace no válido";
+            document.querySelector('p').innerText = "No se han encontrado datos en este enlace.";
             document.getElementById('openAppBtn').style.display = 'none';
         }
     </script>
 </body>
 </html>
+
